@@ -1,24 +1,35 @@
+// Import necessary dependencies from React and Supabase
 import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import ProductCategory from "./ProductCategory";
+
+// Supabase configuration
 const supabaseUrl = "https://ocimdzpalqvkaseuoyrj.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaW1kenBhbHF2a2FzZXVveXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODM3MjIsImV4cCI6MjAzMjc1OTcyMn0.0CSciehOKHh4hlx9KnivMUr9MSAem-S_IIdqVBPbAcU";
+const supabaseKey = "###";
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// MarketMavenHeader component definition
 const MarketMavenHeader = ({
   handleSearchChange,
   handleSearchSubmit,
   handleCategoryClick,
 }) => {
+  // State for managing active tab and product categories
   const [activeTab, setActiveTab] = useState("all");
   const [productCategories, setproductCategories] = useState([]);
+
+  // Handle tab click and category selection
   const handleTabClick = (category) => {
     setActiveTab(category.id);
     handleCategoryClick(category.id);
   };
+
+  // Fetch product categories on component mount
   useEffect(() => {
     fetchProductCategories();
   }, []);
+
+  // Function to fetch product categories from Supabase
   const fetchProductCategories = async () => {
     try {
       const { data, error } = await supabase
@@ -36,9 +47,12 @@ const MarketMavenHeader = ({
       console.error("Error fetching data:", error.message);
     }
   };
+
+  // Render the header component
   return (
     <header className="header">
       <div>Welcome to MarketMaven</div>
+      {/* Search form */}
       <form className="search-form" onSubmit={handleSearchSubmit}>
         <input
           type="text"
@@ -50,6 +64,7 @@ const MarketMavenHeader = ({
           Search
         </button>
       </form>
+      {/* Category tab bar */}
       <div className="tab-bar">
         <button
           className={activeTab === "all" ? "active" : ""}
@@ -57,6 +72,7 @@ const MarketMavenHeader = ({
         >
           All
         </button>
+        {/* Render ProductCategory components for each category */}
         {productCategories.map((category, index) => (
           <ProductCategory
             key={index}
