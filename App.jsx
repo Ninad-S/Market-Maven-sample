@@ -1,19 +1,23 @@
+// Import necessary dependencies and components
 import React, { useState, useEffect } from "react";
-
 import Login from "./Login";
 import MarketMaven from "./MarketMaven";
 import { createClient } from "@supabase/supabase-js";
 
+// Supabase configuration
 const supabaseUrl = "https://ocimdzpalqvkaseuoyrj.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaW1kenBhbHF2a2FzZXVveXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODM3MjIsImV4cCI6MjAzMjc1OTcyMn0.0CSciehOKHh4hlx9KnivMUr9MSAem-S_IIdqVBPbAcU";
+const supabaseKey = "###";
 const supabase = createClient(supabaseUrl, supabaseKey);
+
 function App() {
-  const [notes, setNotes] = useState([]);
+  // State variables
+  const [notes, setNotes] = useState([]); // Unused state, consider removing
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [wasValid, setWasValid] = useState(true);
   const [error, setError] = useState(null);
+
+  // Check for stored user on component mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -22,6 +26,7 @@ function App() {
     }
   }, []);
 
+  // Fetch user data from Supabase
   const fetchUsers = async (username, password) => {
     try {
       const { data, error } = await supabase
@@ -29,6 +34,7 @@ function App() {
         .select("*")
         .eq("userName", username)
         .eq("password", password);
+      
       if (data && data.length > 0) {
         setCurrentUser(data[0]);
         setIsLoggedIn(true);
@@ -38,15 +44,15 @@ function App() {
         setIsLoggedIn(false);
         setWasValid(false);
       }
-      if (error) {
-        throw error;
-      }
+      
+      if (error) throw error;
     } catch (error) {
       console.error("Error fetching data:", error.message);
       setError("Error fetching data");
     }
   };
 
+  // Handle login process
   async function handleLogin(username, password) {
     try {
       await fetchUsers(username, password);
@@ -57,15 +63,20 @@ function App() {
     }
   }
 
+  // Handle logout process
   function handleLogout() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setError(null);
     localStorage.removeItem("user");
   }
+
+  // Handle back button click
   function handleBack() {
     setWasValid(true);
   }
+
+  // Render component
   return (
     <div>
       {error && <p>{error}</p>}
