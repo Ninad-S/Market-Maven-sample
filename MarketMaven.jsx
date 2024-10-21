@@ -1,27 +1,33 @@
+// Import necessary dependencies and components
 import React, { useState, useEffect } from "react";
 import MarketMavenHeader from "./MarketMavenHeader";
 import Product from "./Product";
 import GoogleMap from "./GoogleMap";
 import { createClient } from "@supabase/supabase-js";
 
+// Supabase configuration
 const supabaseUrl = "https://ocimdzpalqvkaseuoyrj.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaW1kenBhbHF2a2FzZXVveXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODM3MjIsImV4cCI6MjAzMjc1OTcyMn0.0CSciehOKHh4hlx9KnivMUr9MSAem-S_IIdqVBPbAcU";
+const supabaseKey = "###";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const MarketMaven = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  // State variables
+  const [products, setProducts] = useState([]); // All products
+  const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products based on search
+  const [searchQuery, setSearchQuery] = useState(""); // Search query string
+  const [selectedCategory, setSelectedCategory] = useState(null); // Selected category ID
+
+  // Fetch products when selectedCategory changes
   useEffect(() => {
     fetchProducts(selectedCategory);
   }, [selectedCategory]);
 
+  // Function to fetch products from Supabase
   const fetchProducts = async (categoryId) => {
     try {
       let { data, error } = {};
 
+      // Query products based on category or fetch all products
       if (categoryId) {
         ({ data, error } = await supabase
           .from("Products")
@@ -31,6 +37,7 @@ const MarketMaven = () => {
         ({ data, error } = await supabase.from("Products").select("*"));
       }
 
+      // Update state with fetched products
       if (data) {
         setProducts(data);
         setFilteredProducts(data);
@@ -44,17 +51,23 @@ const MarketMaven = () => {
     }
   };
 
+  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  // Handle search form submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     filterProducts();
   };
+
+  // Handle category selection
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
   };
+
+  // Filter products based on search query
   const filterProducts = () => {
     const filtered = products.filter((product) =>
       product.ProductName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,6 +75,7 @@ const MarketMaven = () => {
     setFilteredProducts(filtered);
   };
 
+  // Render component
   return (
     <div>
       <MarketMavenHeader
