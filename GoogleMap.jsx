@@ -1,20 +1,27 @@
+// Import necessary dependencies
 import React, { useState, useEffect } from "react";
 import { Map, GoogleApiWrapper, Marker } from "google-maps-react";
 import { createClient } from "@supabase/supabase-js";
 
+// Define map styles
 const mapStyles = {
   width: "100%",
   height: "400px",
 };
 
+// GoogleMap component definition
 const GoogleMap = ({ google }) => {
+  // State for user's location and nearby stores
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyStores, setNearbyStores] = useState([]);
+
+  // Initialize Supabase client
   const supabaseClient = createClient(
     "https://ocimdzpalqvkaseuoyrj.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaW1kenBhbHF2a2FzZXVveXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxODM3MjIsImV4cCI6MjAzMjc1OTcyMn0.0CSciehOKHh4hlx9KnivMUr9MSAem-S_IIdqVBPbAcU"
+    "###"
   );
 
+  // Effect to get user's location and fetch nearby stores
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -32,6 +39,7 @@ const GoogleMap = ({ google }) => {
     }
   }, []);
 
+  // Function to fetch nearby stores from Supabase
   const fetchNearbyStores = async (latitude, longitude) => {
     try {
       const { data: stores, error } = await supabaseClient
@@ -43,8 +51,8 @@ const GoogleMap = ({ google }) => {
         return;
       }
 
+      // Filter and process nearby stores
       const nearbyStoresData = stores.map((store) => {
-        const storeAddress = store.StoreAddress;
         const distance = getDistanceFromLatLonInKm(
           latitude,
           longitude,
@@ -54,26 +62,19 @@ const GoogleMap = ({ google }) => {
 
         console.log("Distance:", distance);
 
-        if (distance <= 10) {
-          return {
-            ...store,
-            distance,
-          };
-        } else {
-          return null;
-        }
-      });
+        return distance <= 10 ? { ...store, distance } : null;
+      }).filter(Boolean);
 
-      const filteredStores = nearbyStoresData.filter((store) => store !== null);
-      console.log("Nearby Stores Data:", filteredStores);
-      setNearbyStores(filteredStores);
+      console.log("Nearby Stores Data:", nearbyStoresData);
+      setNearbyStores(nearbyStoresData);
     } catch (error) {
       console.error("Error fetching nearby stores:", error.message);
     }
   };
 
+  // Helper function to calculate distance between two points
   const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
+    const R = 6371; // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a =
@@ -83,14 +84,16 @@ const GoogleMap = ({ google }) => {
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
+    const d = R * c; // Distance in km
     return d;
   };
 
+  // Helper function to convert degrees to radians
   const deg2rad = (deg) => {
     return deg * (Math.PI / 180);
   };
 
+  // Render the Google Map component
   return (
     <Map
       google={google}
@@ -99,7 +102,10 @@ const GoogleMap = ({ google }) => {
       initialCenter={{ lat: 0, lng: 0 }}
       center={userLocation}
     >
+      {/* Marker for user's location */}
       {userLocation && <Marker position={userLocation} title="Your Location" />}
+      
+      {/* Markers for nearby stores */}
       {nearbyStores.map((store, index) => (
         <Marker
           key={index}
@@ -111,6 +117,7 @@ const GoogleMap = ({ google }) => {
   );
 };
 
+// Wrap the GoogleMap component with GoogleApiWrapper
 export default GoogleApiWrapper({
-  apiKey: "",
+  apiKey: "", // Add your Google Maps API key here
 })(GoogleMap);
